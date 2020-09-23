@@ -4,6 +4,7 @@ set(PROJECT_NAME "QmlDetector")
 project(${PROJECT_NAME})
 
 add_subdirectory(3rdparty)
+#add_subdirectory(minimal)
 
 find_package(Qt5Core         REQUIRED)
 find_package(Qt5Gui          REQUIRED)

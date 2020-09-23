@@ -1,30 +1,13 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-
-if (UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-endif (UNIX)
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/tensorflow ${CMAKE_BINARY_DIR}/flatbuffers/include)
 
-qt5_add_resources(QT_RESOURCES qml.qrc)
 add_executable(${PROJECT_NAME}
     main.cpp
-    cocodetectionfilter.cpp cocodetectionfilter.h
-    ${QT_RESOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Qml
-    Qt5::Quick
-    Qt5::Multimedia
+target_link_libraries(${PROJECT_NAME} PRIVATE
     ${CMAKE_BINARY_DIR}/3rdparty/tensorflow/tensorflow/lite/libtensorflowlite.a
     ${CMAKE_BINARY_DIR}/_deps/ruy-build/libruy.a
     ${CMAKE_BINARY_DIR}/_deps/abseil-cpp-build/absl/base/libabsl_base.a
@@ -64,6 +47,3 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ${CMAKE_BINARY_DIR}/_deps/fft2d-build/libfft2d_fftsg2d.a
     ${CMAKE_BINARY_DIR}/_deps/flatbuffers-build/libflatbuffers.a
 )
-
-
-install(TARGETS ${PROJECT_NAME} DESTINATION /bin)
