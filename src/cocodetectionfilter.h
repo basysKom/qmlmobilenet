@@ -28,6 +28,13 @@ public:
 
 private:
     void initializeModel(const QString &filename);
+    void predict(const QImage& image) const;
+    float* extractOutputAsFloat(int tensorIndex) const;
+
+    int m_requestedInputHeight = 0;
+    int m_requestedInputWidth = 0;
+    int m_requestedInputChannels = 0;
+
     std::unique_ptr<tflite::FlatBufferModel> m_model = nullptr;
     std::unique_ptr<tflite::Interpreter> m_interpreter = nullptr;
 };
