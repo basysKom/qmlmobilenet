@@ -16,6 +16,7 @@ qt5_add_resources(QT_RESOURCES qml.qrc)
 add_executable(${PROJECT_NAME}
     main.cpp
     cocodetectionfilter.cpp cocodetectionfilter.h
+    cocodetectionworker.cpp cocodetectionworker.h
     bitmap_helpers_impl.h
     ${QT_RESOURCES}
 )

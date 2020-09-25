@@ -1,12 +1,10 @@
 #ifndef __COCO_DETECTION_FILTER__
 #define __COCO_DETECTION_FILTER__
 
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
-#include "tensorflow/lite/optional_debug_tools.h"
+#include "cocodetectionworker.h"
 
 #include <QLoggingCategory>
+#include <QThread>
 #include <QAbstractVideoFilter>
 #include <QVideoFilterRunnable>
 
@@ -20,23 +18,21 @@ public:
     QVideoFilterRunnable* createFilterRunnable() override;
 };
 
-class CocoDetectionFilterRunnable : public QVideoFilterRunnable
+class CocoDetectionFilterRunnable : public QObject, public QVideoFilterRunnable
 {
+    Q_OBJECT
 public:
     CocoDetectionFilterRunnable();
+    ~CocoDetectionFilterRunnable();
     QVideoFrame run( QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags ) override;
 
+signals:
+    void imageReady(const QImage &image);
+
 private:
-    void initializeModel(const QString &filename);
-    void predict(const QImage& image) const;
-    float* extractOutputAsFloat(int tensorIndex) const;
-
-    int m_requestedInputHeight = 0;
-    int m_requestedInputWidth = 0;
-    int m_requestedInputChannels = 0;
-
-    std::unique_ptr<tflite::FlatBufferModel> m_model = nullptr;
-    std::unique_ptr<tflite::Interpreter> m_interpreter = nullptr;
+    bool m_detectionWorkerIsBusy = false;
+    std::unique_ptr<CocoDetectionWorker> m_detectionWorker = nullptr;
+    QThread* m_workerThread = nullptr;
 };
 
 #endif // __COCO_DETECTION_FILTER__
