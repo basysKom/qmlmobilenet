@@ -78,7 +78,7 @@ QVideoFrame CocoDetectionFilterRunnable::run( QVideoFrame *input, const QVideoSu
         return image;
     }
 
-    qCInfo(objectworker) << "Prepare next image";
+    qCInfo(objectdetector) << "Prepare next image";
     auto sourceImage = image;
     if (surfaceFormat.scanLineDirection() == QVideoSurfaceFormat::BottomToTop) {
         sourceImage = sourceImage.mirrored();

@@ -10,18 +10,22 @@ CocoDetectionModel::CocoDetectionModel(const QString &labelsFilename, QObject *p
     : QAbstractListModel(parent)
 {
     loadLabels(labelsFilename);
+    createPalette();
+    // avoid deadlocks
+    connect(this, &CocoDetectionModel::detectionObjectsChanged, this, [this]() {
+        beginResetModel();
+        endResetModel();
+    }, Qt::QueuedConnection);
 }
 
 
 QHash<int, QByteArray> CocoDetectionModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
-    roles[LocationX] = QByteArray("locationX");
-    roles[LocationY] = QByteArray("locationY");
-    roles[LocationWidth] = QByteArray("locationWidth");
-    roles[LocationHeight] = QByteArray("locationHeight");
+    roles[BoundingRect] = QByteArray("boundingRect");
     roles[DetectedObjectName] = QByteArray("detectedObject");
     roles[Score] = QByteArray("score");
+    roles[BoundingRectColor] = QByteArray("boundingRectColor");
     return roles;
 }
 
@@ -37,18 +41,14 @@ QVariant CocoDetectionModel::data(const QModelIndex &index, int role) const
     const DetectedObject& detectedObject = m_detectedObjects.at(index.row());
 
     switch(role) {
-    case LocationX:
-        return detectedObject.boundingRect.left();
-    case LocationY:
-        return detectedObject.boundingRect.top();
-    case LocationWidth:
-        return detectedObject.boundingRect.width();
-    case LocationHeight:
-        return detectedObject.boundingRect  .height();
+    case BoundingRect:
+        return detectedObject.boundingRect;
     case DetectedObjectName:
         return m_labels.value(detectedObject.classIndex, QString::number(detectedObject.classIndex));
     case Score:
         return detectedObject.score;
+    case BoundingRectColor:
+        return m_palette.at(index.row() % m_palette.length());
     default:
         return QVariant();
     }
@@ -66,9 +66,8 @@ int CocoDetectionModel::rowCount(const QModelIndex &parent) const
 void CocoDetectionModel::setDetectedObjects(const QVector<DetectedObject> &detectedObjects)
 {
     QMutexLocker locker(&m_detectedObjectsMutex);
-    beginResetModel();
     m_detectedObjects = detectedObjects;
-    endResetModel();
+    emit detectionObjectsChanged();
 }
 
 void CocoDetectionModel::loadLabels(const QString &labelsFilename)
@@ -78,7 +77,7 @@ void CocoDetectionModel::loadLabels(const QString &labelsFilename)
     if (labelsFile.open(QIODevice::ReadOnly)) {
         QTextStream stream(&labelsFile);
         while (!stream.atEnd()) {
-            QStringList line = stream.readLine().split(" ", Qt::SkipEmptyParts);
+            QStringList line = stream.readLine().split("  ", Qt::SkipEmptyParts);
             if (line.length() != 2) {
                 continue;
             }
@@ -102,5 +101,21 @@ void CocoDetectionModel::loadLabels(const QString &labelsFilename)
 
     labelsFile.close();
 
+}
+
+void CocoDetectionModel::createPalette()
+{
+    // ssd_mobilenet_v1_1_metadata_1 can detect a maximum of ten locations
+    m_palette.clear();
+    m_palette << QColor::fromRgb(0xC70039)
+              << QColor::fromRgb(0x111D5E)
+              << QColor::fromRgb(0x438A5E)
+              << QColor::fromRgb(0xCF7500)
+              << QColor::fromRgb(0xF9D56E)
+              << QColor::fromRgb(0x87431D)
+              << QColor::fromRgb(0xE11D74)
+              << QColor::fromRgb(0x91D18B)
+              << QColor::fromRgb(0x30475E)
+              << QColor::fromRgb(0xD7385E);
 }
 

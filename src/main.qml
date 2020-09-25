@@ -11,6 +11,7 @@ ApplicationWindow {
     title: qsTr("Qml Detector")
 
     Item {
+        id: videoItem
         anchors.fill: parent
 
         Camera {
@@ -18,6 +19,7 @@ ApplicationWindow {
         }
 
         VideoOutput {
+            id: videoOutput
             source: camera
             anchors.fill: parent
             filters: [detectionFilter]
@@ -26,5 +28,49 @@ ApplicationWindow {
         CocoDetectionFilter {
             id: detectionFilter
         }
+
+        Repeater {
+            id: detectionRepeater
+            model: detectionFilter.detectionModel
+            Item {
+                id: detectionItem
+                property rect location: videoOutput.mapNormalizedRectToItem(boundingRect)
+
+                implicitWidth: Math.max(objectLocation.width, objectDescription.width)
+                implicitHeight: objectLocation.height + objectDescription.height
+
+                Rectangle {
+                    id: objectLocation
+                    x: location.x
+                    y: location.y
+                    width: location.width
+                    height: location.height
+                    color: "transparent"
+                    border.width: 2
+                    border.color: boundingRectColor
+                }
+
+                Rectangle {
+                    id: objectDescription
+                    anchors.bottom: objectLocation.top
+                    anchors.left: objectLocation.left
+                    anchors.right: objectLocation.right
+                    height: 25
+                    color: objectLocation.border.color
+
+                    Text {
+                        id: description
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        verticalAlignment: Text.AlignVCenter
+                        color: "white"
+                        text: detectedObject + " (" + score.toFixed(2) + ")"
+                    }
+                }
+
+            }
+        }
+
     }
 }

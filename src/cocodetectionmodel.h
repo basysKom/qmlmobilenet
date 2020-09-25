@@ -6,6 +6,7 @@
 #include <QRectF>
 #include <QHash>
 #include <QMutex>
+#include <QColor>
 #include <QObject>
 
 class CocoDetectionModel : public QAbstractListModel
@@ -19,12 +20,10 @@ public:
     };
 
     enum DetectedObjectRole {
-        LocationX = Qt::UserRole + 1,
-        LocationY,
-        LocationWidth,
-        LocationHeight,
+        BoundingRect = Qt::UserRole + 1,
         DetectedObjectName,
-        Score
+        Score,
+        BoundingRectColor
     };
     Q_ENUMS(DetectedObjectRole)
 
@@ -37,12 +36,17 @@ public:
 
     void setDetectedObjects(const QVector<DetectedObject> &detectedObjects);
 
+signals:
+    void detectionObjectsChanged();
+
 private:
     void loadLabels(const QString &labelsFilename);
+    void createPalette();
 
     mutable QMutex m_detectedObjectsMutex;
     QHash<int, QString> m_labels;
     QVector<DetectedObject> m_detectedObjects;
+    QVector<QColor> m_palette;
 
 
 };

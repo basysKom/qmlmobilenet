@@ -165,10 +165,10 @@ void CocoDetectionWorker::predict(const QImage &image) const
         }
 
         const int classIndex = static_cast<int>(outputClasses[detectionIndex]);
-        const int top    = static_cast<int>(locations[4 * detectionIndex]      * image.height());
-        const int left   = static_cast<int>(locations[4 * detectionIndex + 1]  * image.width());
-        const int bottom = static_cast<int>(locations[4 * detectionIndex + 2]  * image.height());
-        const int right  = static_cast<int>(locations[4 * detectionIndex + 3]  * image.width());
+        const float top    = locations[4 * detectionIndex];
+        const float left   = locations[4 * detectionIndex + 1];
+        const float bottom = locations[4 * detectionIndex + 2];
+        const float right  = locations[4 * detectionIndex + 3];
 
         const QRectF boundingRect(left, top, right - left, bottom - top);
         qCInfo(objectworker) << "Found object" << classIndex << "with score" << score << "at:" << boundingRect;
