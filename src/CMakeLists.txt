@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
     main.cpp
     cocodetectionfilter.cpp cocodetectionfilter.h
     cocodetectionworker.cpp cocodetectionworker.h
+    cocodetectionmodel.cpp cocodetectionmodel.h
     bitmap_helpers_impl.h
     ${QT_RESOURCES}
 )

@@ -9,23 +9,34 @@ Q_LOGGING_CATEGORY(objectdetector, "tensorflow.cocodetectionfilter")
 
 const auto PathToMachineLearningModels = QStringLiteral("Development/MachineLearning/Models");
 const auto CocoModelSSD = QStringLiteral("ssd_mobilenet_v1_1_metadata_1.tflite");
+const auto CocoLabels = QStringLiteral("coco_labels.txt");
 
 CocoDetectionFilter::CocoDetectionFilter( QObject* parent )
     : QAbstractVideoFilter( parent )
 {
+    auto labelFile = QDir(PathToMachineLearningModels).filePath(CocoLabels);
+    labelFile = QStandardPaths::locate(QStandardPaths::HomeLocation, labelFile);
+    m_detectionModel = new CocoDetectionModel(labelFile, this);
 }
 
 QVideoFilterRunnable* CocoDetectionFilter::createFilterRunnable()
 {
-    return new CocoDetectionFilterRunnable();
+    auto modelFile = QDir(PathToMachineLearningModels).filePath(CocoModelSSD);
+    modelFile = QStandardPaths::locate(QStandardPaths::HomeLocation, modelFile);
+    return new CocoDetectionFilterRunnable(modelFile, m_detectionModel);
 }
 
 
-CocoDetectionFilterRunnable::CocoDetectionFilterRunnable()
+CocoDetectionModel* CocoDetectionFilter::detectionModel() const
 {
-    auto modelFile = QDir(PathToMachineLearningModels).filePath(CocoModelSSD);
-    modelFile = QStandardPaths::locate(QStandardPaths::HomeLocation, modelFile);
-    m_detectionWorker = std::unique_ptr<CocoDetectionWorker>(new CocoDetectionWorker(modelFile));
+    return m_detectionModel;
+}
+
+
+CocoDetectionFilterRunnable::CocoDetectionFilterRunnable(const QString &modelFilename, CocoDetectionModel* detectionModel)
+{
+    m_detectionWorker = std::unique_ptr<CocoDetectionWorker>(new CocoDetectionWorker(modelFilename));
+    m_detectionWorker->setDetectionModel(detectionModel);
 
     m_workerThread = new QThread;
     m_detectionWorker->moveToThread(m_workerThread);

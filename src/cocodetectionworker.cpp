@@ -14,6 +14,11 @@ CocoDetectionWorker::CocoDetectionWorker(const QString& tfLiteFile)
     initializeModel(tfLiteFile);
 }
 
+void CocoDetectionWorker::setDetectionModel(CocoDetectionModel* detectionModel)
+{
+    m_detectionModel = QPointer<CocoDetectionModel>(detectionModel);
+}
+
 void CocoDetectionWorker::initializeModel(const QString& filename)
 {
     qCInfo(objectworker) << "Loading model ...";
@@ -149,6 +154,8 @@ void CocoDetectionWorker::predict(const QImage &image) const
     const float* outputScores       = extractOutputAsFloats(outputTensors[2]);
     const float* foundDetections    = extractOutputAsFloats(outputTensors[3]);
 
+    QVector<CocoDetectionModel::DetectedObject> detectedObjects;
+
     for (int detectionIndex = 0; detectionIndex < static_cast<int>(*foundDetections); detectionIndex++) {
 
         const float score = outputScores[detectionIndex];
@@ -164,10 +171,21 @@ void CocoDetectionWorker::predict(const QImage &image) const
         const int right  = static_cast<int>(locations[4 * detectionIndex + 3]  * image.width());
 
         const QRectF boundingRect(left, top, right - left, bottom - top);
-
         qCInfo(objectworker) << "Found object" << classIndex << "with score" << score << "at:" << boundingRect;
 
+        CocoDetectionModel::DetectedObject detectedObject;
+        detectedObject.classIndex = classIndex;
+        detectedObject.score = score;
+        detectedObject.boundingRect = boundingRect;
+
+        detectedObjects << detectedObject;
+
     }
+
+    if (!m_detectionModel.isNull()) {
+        m_detectionModel->setDetectedObjects(detectedObjects);
+    }
+
 
     emit finishedPrediction();
 }
