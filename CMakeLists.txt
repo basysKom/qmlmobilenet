@@ -1,3 +1,9 @@
+#[[
+SPDX-FileCopyrightText: 2024 basysKom GmbH
+SPDX-FileContributor: Berthold Krevert <berthold.krevert@basyskom.com>
+SPDX-License-Identifier: BSD-3-Clause
+]]
+
 cmake_minimum_required(VERSION 3.15)
 
 set(PROJECT_NAME "QmlMobilenet")

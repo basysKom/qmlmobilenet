@@ -21,29 +21,34 @@ git submodule update --init
 
 ### Step 2: Download the Model and Label Files
 
-**Download the Model File**  
+**Download the Model File**
+
 The model file can be downloaded from Kaggle:  
 [SSD MobileNet V1 TFLite Model](https://www.kaggle.com/models/tensorflow/ssd-mobilenet-v1/tfLite/metadata/1?lite-format=tflite&tfhub-redirect=true)  
 Extract the downloaded `.tar` archive and rename the model file to:  
 `ssd_mobilenet_v1_1_metadata_1.tflite`
 
-**Download the Labels File**  
+**Download the Labels File**
+
 The labels file from the COCO dataset can be downloaded from:  
 [COCO Labels](https://dl.google.com/coral/canned_models/coco_labels.txt)
 
-**Move Files**  
+**Move Files**
+
 Place both files (`ssd_mobilenet_v1_1_metadata_1.tflite` and `coco_labels.txt`) into the `model/` directory.
 
 ### Step 3: Fix TensorFlow Lite Build Issues
 
 Building TensorFlow Lite does not work out of the box. Follow these steps to resolve the issues:
 
-**1. Update the CMakeLists.txt File**  
+**1. Update the CMakeLists.txt File**
+
 Open the file:  
 `3rdparty/tensorflow/tensorflow/lite/CMakeLists.txt`  
 Replace all occurrences of `${PROJECT_SOURCE_DIR}` with `${CMAKE_SOURCE_DIR}`.
 
-**2. Include Benchmark Sources in TFLITE_BENCHMARK_SRCS**  
+**2. Include Benchmark Sources in TFLITE_BENCHMARK_SRCS**
+
 Locate the following lines in the file and move them before the `add_library(tensorflow ...)` line:
 ```cmake
 # Move these lines to the top
@@ -62,7 +67,8 @@ list(APPEND TFLITE_BENCHMARK_SRCS
 )
 ```
 
-**3. Add TFLITE_BENCHMARK_SRCS to tensorflowlite Target**  
+**3. Add TFLITE_BENCHMARK_SRCS to tensorflowlite Target**
+
 Ensure the `tensorflowlite` library includes `TFLITE_BENCHMARK_SRCS`. Update the `add_library` command as follows:
 
 ```cmake
@@ -92,6 +98,7 @@ add_library(tensorflowlite
 ```
 
 **4. Disable XNNPACK**
+
 Locate the XNNPACK option in the CMakeLists.txt file and set it to OFF:
 
 ```cmake
@@ -141,6 +148,8 @@ Now everything should compile properly.
 
 
 ## License
+
+This project is released under the GPLv3.0-or-later License.
 
 
 

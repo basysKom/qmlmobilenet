@@ -1,3 +1,10 @@
+/**
+ * SPDX-FileCopyrightText: 2024 basysKom GmbH
+ * SPDX-FileContributor: Berthold Krevert <berthold.krevert@basyskom.com>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #include "cocodetectionmodel.h"
 
 #include <QStringList>

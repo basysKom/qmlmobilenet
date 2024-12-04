@@ -1,3 +1,10 @@
+/**
+ * SPDX-FileCopyrightText: 2024 basysKom GmbH
+ * SPDX-FileContributor: Berthold Krevert <berthold.krevert@basyskom.com>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import QtQuick 2.6
 import QtMultimedia 5.5
 import QtQuick.Controls 1.0
