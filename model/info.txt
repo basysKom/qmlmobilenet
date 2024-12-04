@@ -1,0 +1,9 @@
+Copy model and label files to this folder
+
+Model file can be downloaded from Kaggle:
+
+https://www.kaggle.com/models/tensorflow/ssd-mobilenet-v1/tfLite/metadata/1?lite-format=tflite&tfhub-redirect=true
+
+Get the label file here:
+
+https://dl.google.com/coral/canned_models/coco_labels.txt

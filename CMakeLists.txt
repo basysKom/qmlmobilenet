@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(PROJECT_NAME "QmlDetector")
+set(PROJECT_NAME "QmlMobilenet")
 project(${PROJECT_NAME})
 
 add_subdirectory(3rdparty)

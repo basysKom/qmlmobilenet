@@ -11,9 +11,12 @@ moc_*.h
 qrc_*.cpp
 *.moc
 *.qmlc
+.vscode
 ui_*.h
 Makefile*
 *.autosave
 *.qmlproject.user
 *.qmlproject.user.*
-dataviewer
+build/
+model/ssd_mobilenet_v1_1_metadata_1.tflite
+model/coco_labels.txt

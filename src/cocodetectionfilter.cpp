@@ -7,7 +7,7 @@
 
 Q_LOGGING_CATEGORY(objectdetector, "tensorflow.cocodetectionfilter")
 
-const auto PathToMachineLearningModels = QStringLiteral("Development/MachineLearning/Models");
+const auto PathToMachineLearningModels = QStringLiteral("../model");
 const auto CocoModelSSD = QStringLiteral("ssd_mobilenet_v1_1_metadata_1.tflite");
 const auto CocoLabels = QStringLiteral("coco_labels.txt");
 
@@ -15,14 +15,12 @@ CocoDetectionFilter::CocoDetectionFilter( QObject* parent )
     : QAbstractVideoFilter( parent )
 {
     auto labelFile = QDir(PathToMachineLearningModels).filePath(CocoLabels);
-    labelFile = QStandardPaths::locate(QStandardPaths::HomeLocation, labelFile);
     m_detectionModel = new CocoDetectionModel(labelFile, this);
 }
 
 QVideoFilterRunnable* CocoDetectionFilter::createFilterRunnable()
 {
     auto modelFile = QDir(PathToMachineLearningModels).filePath(CocoModelSSD);
-    modelFile = QStandardPaths::locate(QStandardPaths::HomeLocation, modelFile);
     return new CocoDetectionFilterRunnable(modelFile, m_detectionModel);
 }
 
@@ -56,7 +54,7 @@ CocoDetectionFilterRunnable::~CocoDetectionFilterRunnable()
 }
 
 
-QVideoFrame CocoDetectionFilterRunnable::run( QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags )
+QVideoFrame CocoDetectionFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, RunFlags flags )
 {
     Q_UNUSED( flags )
 
@@ -65,12 +63,20 @@ QVideoFrame CocoDetectionFilterRunnable::run( QVideoFrame *input, const QVideoSu
     }
 
     const QImage::Format imageFormat = QVideoFrame::imageFormatFromPixelFormat(input->pixelFormat());
-    input->map(QAbstractVideoBuffer::ReadWrite);
+    input->map(QAbstractVideoBuffer::ReadOnly);
+    QImage image;
+
+    if (imageFormat != QImage::Format_Invalid) {
     QImage image = QImage(input->bits(),
                  input->width(),
                  input->height(),
                  input->bytesPerLine(),
                  imageFormat).copy();
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        image = input->image();
+#endif
+    }
 
     input->unmap();
 
@@ -88,8 +94,10 @@ QVideoFrame CocoDetectionFilterRunnable::run( QVideoFrame *input, const QVideoSu
         sourceImage = sourceImage.convertToFormat(QImage::Format_RGB888);
     }
 
-    emit imageReady(sourceImage);
+    if (sourceImage.format() != QImage::Format_Invalid) {
+        emit imageReady(sourceImage);
+        m_detectionWorkerIsBusy = true;
+    }
 
-    m_detectionWorkerIsBusy = true;
     return image;
 }

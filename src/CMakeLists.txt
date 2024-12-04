@@ -10,7 +10,10 @@ if (UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif (UNIX)
 
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/tensorflow ${CMAKE_BINARY_DIR}/flatbuffers/include)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/3rdparty/tensorflow
+    ${CMAKE_BINARY_DIR}/flatbuffers/include
+)
 
 qt5_add_resources(QT_RESOURCES qml.qrc)
 add_executable(${PROJECT_NAME}
@@ -70,3 +73,24 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /bin)
+
+set(MODEL_FILES
+    ${CMAKE_SOURCE_DIR}/model/ssd_mobilenet_v1_1_metadata_1.tflite
+    ${CMAKE_SOURCE_DIR}/model/coco_labels.txt
+)
+
+add_custom_target(copy_model_files ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/model
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${MODEL_FILES}
+        ${CMAKE_BINARY_DIR}/model
+    COMMENT "Copying model and label files to build directory"
+)
+
+add_dependencies(${PROJECT_NAME} copy_model_files)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bin
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/bin
+    COMMENT "Copying qmlmobilenet executable to bin directory"
+)
