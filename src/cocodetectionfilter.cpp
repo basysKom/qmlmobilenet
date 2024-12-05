@@ -8,6 +8,7 @@
 #include "cocodetectionfilter.h"
 #include "bitmap_helpers_impl.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
@@ -56,6 +57,7 @@ CocoDetectionFilterRunnable::CocoDetectionFilterRunnable(const QString &modelFil
 
 CocoDetectionFilterRunnable::~CocoDetectionFilterRunnable()
 {
+    m_detectionWorker->waitForPredictionToFinish();
     m_workerThread->quit();
     m_workerThread->deleteLater();
 }

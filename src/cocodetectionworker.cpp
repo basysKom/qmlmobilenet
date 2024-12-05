@@ -145,7 +145,10 @@ void CocoDetectionWorker::predict(const QImage &image) const
     // finally run the network :-)
     QElapsedTimer timer;
     timer.start();
+
+    m_invocationMutex.lock();
     TfLiteStatus status = m_interpreter->Invoke();
+    m_invocationMutex.unlock();
 
     if (status != kTfLiteOk) {
         qCWarning(objectworker) << "Failed to inference the image" << status;

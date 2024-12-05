@@ -16,6 +16,8 @@
 #include "tensorflow/lite/optional_debug_tools.h"
 
 #include <QObject>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QPointer>
 #include <QLoggingCategory>
 
@@ -27,6 +29,8 @@ public:
     CocoDetectionWorker(const QString& tfLiteFile);
     void setDetectionModel(CocoDetectionModel* detectionModel);
 
+    void waitForPredictionToFinish() { QMutexLocker locker(&m_invocationMutex); }
+
 public slots:
     void predict(const QImage& image) const;
 
@@ -34,6 +38,7 @@ signals:
     void finishedPrediction() const;
 
 private:
+    mutable QMutex m_invocationMutex;
     void initializeModel(const QString &filename);
     float* extractOutputAsFloats(int tensorIndex) const;
 
